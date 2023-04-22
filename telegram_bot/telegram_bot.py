@@ -14,12 +14,14 @@ from aiogram.dispatcher import FSMContext
 
 from weather import openweather
 from exchangerates import exchangerates
+from images import giphy
 
 
 # API keys
 TELEGRAM_BOT_API_TOKEN = '5914526270:AAFgP6yYwbK01guf9NLVgUBWaGOc8zrizYA'
 OPENWEATHER_API_KEY = 'b5ea7a64dc1c5450e68c809c8fda159b'
 EXCHANGE_RATES_API_KEY = '4HxWSwuMJ1Q901tAr9D4KrXqC03wadvw'
+GIPHY_API_KEY = 'E4uw37nYmIMKByCuNZqEkCDlHUopYXlW'
 
 # Messages templates
 MENU = (
@@ -27,6 +29,7 @@ MENU = (
     '  /help - to show this list of commands\n'
     '  /weather - to check current weather in a given locality\n'
     '  /currencies - to convert currencies\n'
+    '  /funny - to get a funny image\n'
     '  /cancel - to cancel a command process'
 )
 
@@ -218,6 +221,23 @@ async def currencies_amount(message: types.Message, state: FSMContext):
             )
         finally:
             await state.finish()
+
+@dp.message_handler(commands=['funny'])
+async def funny_image(message: types.Message):
+    '''
+    Replies with a funny image
+    '''
+    # Send notification (due to the long waiting period)
+    await message.answer('Sure, wait for a moment...')
+
+    # Get image and send to the chat
+    try:
+        image = await giphy.get_random_image_by_tag('funny', GIPHY_API_KEY)
+        await message.answer_photo(image)
+    except (giphy.AccessDenied, giphy.ServiceUnavailable):
+        await message.answer(
+            'Something went wrong. We\'re working on that. Try again later.'
+        )
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
