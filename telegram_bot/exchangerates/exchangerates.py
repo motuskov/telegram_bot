@@ -2,6 +2,7 @@
 Represents functions for work with the ExchangeRates service.
 '''
 import aiohttp
+import re
 
 
 URL = 'https://api.apilayer.com/exchangerates_data/convert'
@@ -72,3 +73,9 @@ async def convert_currency(
                 ))
             else:
                 raise ServiceUnavailable(f'Status code: {response.status}')
+
+def check_currency_code(currency_code: str) -> bool:
+    '''
+    Checks the format of given 'currency_code'.
+    '''
+    return bool(re.fullmatch(r'^[a-zA-Z]{3}$', currency_code))

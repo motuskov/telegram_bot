@@ -13,6 +13,7 @@ from aiogram.dispatcher.filters.state import (
 from aiogram.dispatcher import FSMContext
 
 from weather import openweather
+from exchangerates import exchangerates
 
 
 # API keys
@@ -25,6 +26,7 @@ MENU = (
     'Choose an action:\n'
     '  /help - to show this list of commands\n'
     '  /weather - to check current weather in a given locality\n'
+    '  /currencies - to convert currencies\n'
     '  /cancel - to cancel a command process'
 )
 
@@ -42,6 +44,15 @@ class WeatherStates(StatesGroup):
     '''
     locality = State()
 
+class CurrenciesStates(StatesGroup):
+    '''
+    Represents a group of states for converting currencies.
+    '''
+    from_currency = State()
+    to_currency = State()
+    amount = State()
+
+# Message handlers
 @dp.message_handler(state='*', commands=['cancel'])
 async def cancel(message: types.Message, state: FSMContext):
     '''
@@ -126,6 +137,87 @@ async def weather_locality(message: types.Message, state: FSMContext):
             'Something went wrong. We\'re working on that. Try again later.'
         )
         await state.finish()
+
+@dp.message_handler(commands=['currencies'])
+async def currencies_start(message: types.Message):
+    '''
+    Starts currencies converter.
+    '''
+    # Set initial state
+    await CurrenciesStates.from_currency.set()
+
+    # Ask currency code to convert from
+    await message.answer('What currency would you like to convert from?')
+
+@dp.message_handler(state=CurrenciesStates.from_currency)
+async def currencies_from_currency(message: types.Message, state: FSMContext):
+    '''
+    Processes from currency.
+    '''
+    # Save from currency
+    from_currency = message.text
+    if not exchangerates.check_currency_code(from_currency):
+        await message.answer('Currency should be entered as three latin letters. Try again.')
+        return
+    async with state.proxy() as data:
+        data['from_currency'] = from_currency
+
+    # Go to the next state
+    await CurrenciesStates.next()
+
+    # Ask currency code to convert to
+    await message.answer('What currency would you like to convert to?')
+
+@dp.message_handler(state=CurrenciesStates.to_currency)
+async def currencies_to_currency(message: types.Message, state: FSMContext):
+    '''
+    Processes to currency.
+    '''
+    # Save to currency
+    to_currency = message.text
+    if not exchangerates.check_currency_code(to_currency):
+        await message.answer('Currency should be entered as three latin letters. Try again.')
+        return
+    async with state.proxy() as data:
+        data['to_currency'] = to_currency
+
+    # Go to the next state
+    await CurrenciesStates.next()
+
+    # Ask amount to convert
+    await message.answer('Enter amount for convertation.')
+
+@dp.message_handler(state=CurrenciesStates.amount)
+async def currencies_amount(message: types.Message, state: FSMContext):
+    '''
+    Converts currency.
+    '''
+    async with state.proxy() as data:
+        try:
+            data['amount'] = float(message.text)
+        except ValueError:
+            await message.answer('Amount should be an integer or a fractional number. Try again.')
+            return
+
+        # Convert currency and output
+        try:
+            result = await exchangerates.convert_currency(
+                data['from_currency'],
+                data['to_currency'],
+                data['amount'],
+                EXCHANGE_RATES_API_KEY
+            )
+            await message.answer(
+                f'{data["amount"]} {data["from_currency"]} = {result} {data["to_currency"]}'
+            )
+        except exchangerates.ConversionError:
+            await message.answer('I cannot convert. Please, check the data you\'ve entered.')
+        except (exchangerates.AccessDenied, exchangerates.ServiceUnavailable):
+            await message.answer(
+                'Something went wrong. We\'re working on that. Try again later.'
+            )
+        finally:
+            await state.finish()
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)

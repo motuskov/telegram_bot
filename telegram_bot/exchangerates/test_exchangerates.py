@@ -85,3 +85,10 @@ def test_convert_currency_bad_url():
             TEST_API_KEY
         ))
     exchangerates.URL = url
+
+def test_check_currency_code_output():
+    '''
+    Tests output of 'check_currency_code' function.
+    '''
+    assert exchangerates.check_currency_code('USD') == True
+    assert exchangerates.check_currency_code('Russian Ruble') == False
