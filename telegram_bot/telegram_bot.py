@@ -19,13 +19,8 @@ from aiogram.types import (
 from weather import openweather
 from exchangerates import exchangerates
 from images import giphy
+from . import keys
 
-
-# API keys
-TELEGRAM_BOT_API_TOKEN = '5914526270:AAFgP6yYwbK01guf9NLVgUBWaGOc8zrizYA'
-OPENWEATHER_API_KEY = 'b5ea7a64dc1c5450e68c809c8fda159b'
-EXCHANGE_RATES_API_KEY = '4HxWSwuMJ1Q901tAr9D4KrXqC03wadvw'
-GIPHY_API_KEY = 'E4uw37nYmIMKByCuNZqEkCDlHUopYXlW'
 
 # Messages templates
 MENU = (
@@ -42,7 +37,7 @@ MENU = (
 logging.basicConfig(level=logging.INFO)
 
 # Initialize bot and dispatcher
-bot = Bot(token=TELEGRAM_BOT_API_TOKEN)
+bot = Bot(token=keys.TELEGRAM_BOT_API_TOKEN)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 # Initialize a storage for keeping the list of group chats
@@ -130,7 +125,7 @@ async def weather_locality(message: types.Message, state: FSMContext):
         # Get weather information
         locality_weather = await openweather.get_locality_weather(
             locality_name,
-            OPENWEATHER_API_KEY
+            keys.OPENWEATHER_API_KEY
         )
 
         # Send the weather information to the user
@@ -224,7 +219,7 @@ async def currencies_amount(message: types.Message, state: FSMContext):
                 data['from_currency'],
                 data['to_currency'],
                 data['amount'],
-                EXCHANGE_RATES_API_KEY
+                keys.EXCHANGE_RATES_API_KEY
             )
             await message.answer(
                 f'{data["amount"]} {data["from_currency"]} = {result} {data["to_currency"]}'
@@ -248,7 +243,7 @@ async def funny_image(message: types.Message):
 
     # Get image and send to the chat
     try:
-        image = await giphy.get_random_image_by_tag('funny', GIPHY_API_KEY)
+        image = await giphy.get_random_image_by_tag('funny', keys.GIPHY_API_KEY)
         await message.answer_photo(image)
     except (giphy.AccessDenied, giphy.ServiceUnavailable):
         await message.answer(
