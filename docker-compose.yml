@@ -1,6 +1,10 @@
 services:
+  ds:
+    image: redis:7.0
   app:
     build:
       context: .
     volumes:
     - ./:/app
+    depends_on:
+      - ds

@@ -5,7 +5,7 @@ from aiogram import (
     executor,
     types,
 )
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.contrib.fsm_storage.redis import RedisStorage2
 from aiogram.dispatcher.filters.state import (
     State,
     StatesGroup,
@@ -38,7 +38,8 @@ logging.basicConfig(level=logging.INFO)
 
 # Initialize bot and dispatcher
 bot = Bot(token=keys.TELEGRAM_BOT_API_TOKEN)
-dp = Dispatcher(bot, storage=MemoryStorage())
+storage = RedisStorage2('ds', db=0, prefix='bot_fsm')
+dp = Dispatcher(bot, storage=storage)
 
 # Initialize a storage for keeping the list of group chats
 group_chats = {}
