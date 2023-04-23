@@ -19,7 +19,7 @@ from aiogram.types import (
 from weather import openweather
 from exchangerates import exchangerates
 from images import giphy
-from . import keys
+import keys
 
 
 # Messages templates
