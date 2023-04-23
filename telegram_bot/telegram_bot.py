@@ -1,4 +1,5 @@
 import logging
+import redis.asyncio as redis
 from aiogram import (
     Bot,
     Dispatcher,
@@ -38,11 +39,8 @@ logging.basicConfig(level=logging.INFO)
 
 # Initialize bot and dispatcher
 bot = Bot(token=keys.TELEGRAM_BOT_API_TOKEN)
-storage = RedisStorage2('ds', db=0, prefix='bot_fsm')
-dp = Dispatcher(bot, storage=storage)
-
-# Initialize a storage for keeping the list of group chats
-group_chats = {}
+bot_ds = RedisStorage2('ds', db=0, prefix='bot_fsm')
+dp = Dispatcher(bot, storage=bot_ds)
 
 # States
 class WeatherStates(StatesGroup):
@@ -66,6 +64,27 @@ class PollStates(StatesGroup):
     group_chat = State()
     question = State()
     answer = State()
+
+async def get_group_chats(host: str = 'localhost', db: str | int = 0) -> list[tuple[str, str]]:
+    '''
+    Retrieves bot's group chat list from a Redis data storage.
+    '''
+    # Open connection to a data storage
+    group_chats_ds = redis.Redis(host=host, db=db)
+
+    # Retrieve 
+    group_chat_keys = await group_chats_ds.keys()
+    group_chats = []
+    for group_chat_key in group_chat_keys:
+        group_chats.append((
+            (await group_chats_ds.get(group_chat_key)).decode(),
+            group_chat_key.decode()
+        ))
+
+    # Close data storage connection
+    await group_chats_ds.close()
+
+    return group_chats
 
 # Message handlers
 @dp.message_handler(state='*', commands=['cancel'])
@@ -256,6 +275,9 @@ async def poll_start(message: types.Message):
     '''
     Starts polls creator.
     '''
+    # Get group chats
+    group_chats = await get_group_chats(host='ds', db=1)
+
     # Check if there are any group chats where the bot is present
     if not group_chats:
         await message.answer(
@@ -268,8 +290,8 @@ async def poll_start(message: types.Message):
     await PollStates.group_chat.set()
 
     # Ask user to choose a chat group
-    answer_buttons = [InlineKeyboardButton(group_chat[1], callback_data=group_chat[0])
-               for group_chat in group_chats.items()]
+    answer_buttons = [InlineKeyboardButton(group_chat[0], callback_data=group_chat[1])
+                      for group_chat in group_chats]
     answer_buttons.append(InlineKeyboardButton('There are no desired chat in the list', callback_data=0))
     answer_markup = InlineKeyboardMarkup(row_width=1)
     answer_markup.add(*answer_buttons)
@@ -369,11 +391,19 @@ async def manage_group_chat_list(my_chat_member: types.ChatMemberUpdated):
     if my_chat_member.chat.type != 'group':
         return
 
+    # Open connection to a data storage for keeping the list of group chats
+    group_chats_ds = redis.Redis(host='ds', db=1)
+
     # Manage the list of group chats
     if my_chat_member.new_chat_member.status == 'left':
-        group_chats.pop(my_chat_member.chat.id, None)
+        #group_chats.pop(my_chat_member.chat.id, None)
+        await group_chats_ds.delete(str(my_chat_member.chat.id))
     else:
-        group_chats[my_chat_member.chat.id] = my_chat_member.chat.title
+        #group_chats[my_chat_member.chat.id] = my_chat_member.chat.title
+        await group_chats_ds.set(str(my_chat_member.chat.id), my_chat_member.chat.title)
+
+    # Close connection to the data storage
+    await group_chats_ds.close()
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
