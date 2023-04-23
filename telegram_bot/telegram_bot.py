@@ -21,6 +21,7 @@ from weather import openweather
 from exchangerates import exchangerates
 from images import giphy
 import keys
+import settings
 
 
 # Messages templates
@@ -39,7 +40,11 @@ logging.basicConfig(level=logging.INFO)
 
 # Initialize bot and dispatcher
 bot = Bot(token=keys.TELEGRAM_BOT_API_TOKEN)
-bot_ds = RedisStorage2('ds', db=0, prefix='bot_fsm')
+bot_ds = RedisStorage2(
+    settings.DATA_STORAGE_HOST,
+    db=settings.DATA_STORAGE_BOT_DB,
+    prefix=settings.DATA_STORAGE_BOT_PREFIX
+)
 dp = Dispatcher(bot, storage=bot_ds)
 
 # States
@@ -276,7 +281,10 @@ async def poll_start(message: types.Message):
     Starts polls creator.
     '''
     # Get group chats
-    group_chats = await get_group_chats(host='ds', db=1)
+    group_chats = await get_group_chats(
+        host=settings.DATA_STORAGE_HOST,
+        db=settings.DATA_STORAGE_CHAT_LIST_DB
+    )
 
     # Check if there are any group chats where the bot is present
     if not group_chats:
@@ -349,7 +357,7 @@ async def poll_answer(message: types.Message, state: FSMContext):
         data['answers'] = answers
 
     # Ask user to put a poll answer
-    if len(answers) < 2:
+    if len(answers) < settings.POLL_ANSWERS_MIN_NUMBER:
         await message.answer('Enter a next posible answer of the poll.')
     else:
         answer_buttons = [InlineKeyboardButton('finish', callback_data='finish')]
@@ -392,7 +400,10 @@ async def manage_group_chat_list(my_chat_member: types.ChatMemberUpdated):
         return
 
     # Open connection to a data storage for keeping the list of group chats
-    group_chats_ds = redis.Redis(host='ds', db=1)
+    group_chats_ds = redis.Redis(
+        host=settings.DATA_STORAGE_HOST,
+        db=settings.DATA_STORAGE_CHAT_LIST_DB
+    )
 
     # Manage the list of group chats
     if my_chat_member.new_chat_member.status == 'left':
