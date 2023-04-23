@@ -1,5 +1,5 @@
 '''
-Represents functions for getting images from the Internet.
+Represents functions for getting images from the Giphy service.
 '''
 import aiohttp
 
@@ -21,7 +21,8 @@ class AccessDenied(Exception):
 
 async def get_random_image_by_tag(tag: str, api_key: str) -> bytes:
     '''
-    Retrieves a random image from the Giphy service.
+    Retrieves a random image from the Giphy service by tag 'tag' and API key 'api_key'.
+    Can raise exceptions 'AccessDenied' and 'ServiceUnavailable'.
     '''
     # Set request parameters
     params = {
@@ -51,7 +52,7 @@ async def get_random_image_by_tag(tag: str, api_key: str) -> bytes:
                     message = 'There is no any message in the service response.'
                 raise AccessDenied(message)
             else:
-                raise ServiceUnavailable(f'Status code: {response.status}')
+                raise ServiceUnavailable(f'The Giphy service has returned code {response.status}')
 
     # Download the image
     async with aiohttp.ClientSession() as session:
@@ -62,4 +63,6 @@ async def get_random_image_by_tag(tag: str, api_key: str) -> bytes:
                 except:
                     raise ServiceUnavailable('Some bad image data has received.')
             else:
-                raise ServiceUnavailable(f'Status code: {response.status}')
+                raise ServiceUnavailable(
+                    f'During an image downloading next status code has returned {response.status}'
+                )

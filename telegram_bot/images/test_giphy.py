@@ -1,3 +1,6 @@
+'''
+Tests 'giphy' module.
+'''
 import asyncio
 import pytest
 
@@ -17,8 +20,9 @@ def test_get_random_image_by_tag_bad_api_key():
     '''
     Tests 'get_random_image_by_tag' function with bad API key given.
     '''
+    api_key = '___'
     with pytest.raises(giphy.AccessDenied):
-        asyncio.run(giphy.get_random_image_by_tag('funny', '_'))
+        asyncio.run(giphy.get_random_image_by_tag('funny', api_key))
 
 def test_get_random_image_by_tag_bad_url():
     '''
