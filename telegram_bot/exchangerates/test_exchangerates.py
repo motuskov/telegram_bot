@@ -1,3 +1,6 @@
+'''
+Tests 'exchangerates' module.
+'''
 import asyncio
 import pytest
 
@@ -90,5 +93,5 @@ def test_check_currency_code_output():
     '''
     Tests output of 'check_currency_code' function.
     '''
-    assert exchangerates.check_currency_code('USD') == True
+    assert exchangerates.check_currency_code('RUB') == True
     assert exchangerates.check_currency_code('Russian Ruble') == False

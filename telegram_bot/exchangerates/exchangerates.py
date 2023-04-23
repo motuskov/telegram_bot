@@ -35,6 +35,7 @@ async def convert_currency(
     '''
     Converts 'amount' from currency with code 'from_cur_code' to currency with code 'to_cur_code'
     using the ExchangeRates service and API key 'api_key'.
+    Can raise exceptions 'ConversionError', 'AccessDenied' and 'ServiceUnavailable'.
     '''
     # Set request headers
     headers = {'apikey': api_key}
@@ -62,17 +63,20 @@ async def convert_currency(
                 else:
                     raise ServiceUnavailable('Bad data has received from the service.')
             elif response.status == 400:
-                if data.get('error', None):
+                try:
                     raise ConversionError(data['error']['message'])
-                else:
-                    raise ConversionError('An unknown conversion error has occured.')
+                except KeyError:
+                    raise ServiceUnavailable('The ExchangeRates service has returned code 400.')
             elif response.status == 401:
-                raise AccessDenied(data.get(
-                    'message',
-                    'There is no any message in the service response.'
-                ))
+                try:
+                    message = data['message']
+                except KeyError:
+                    message = 'There is no any message in the service response.'
+                raise AccessDenied(message)
             else:
-                raise ServiceUnavailable(f'Status code: {response.status}')
+                raise ServiceUnavailable(
+                    f'The ExchangeRates service has returned code {response.status}'
+                )
 
 def check_currency_code(currency_code: str) -> bool:
     '''
