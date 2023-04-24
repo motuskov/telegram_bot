@@ -155,7 +155,7 @@ async def currencies_from_currency(message: types.Message, state: FSMContext):
         await message.answer(messages.CURRENCIES_BAD_CURRENCY_CODE)
         return
     async with state.proxy() as data:
-        data['from_currency'] = from_currency
+        data['from_currency'] = from_currency.upper()
 
     # Go to the next state
     await states.CurrenciesStates.next()
@@ -174,7 +174,7 @@ async def currencies_to_currency(message: types.Message, state: FSMContext):
         await message.answer(messages.CURRENCIES_BAD_CURRENCY_CODE)
         return
     async with state.proxy() as data:
-        data['to_currency'] = to_currency
+        data['to_currency'] = to_currency.upper()
 
     # Go to the next state
     await states.CurrenciesStates.next()

@@ -36,15 +36,18 @@ WEATHER_WEATHER = (
 )
 
 # Currencies
-CURRENCIES_ASK_FROM_CURRENCY = 'What currency would you like to convert from?'
-CURRENCIES_ASK_TO_CURRENCY = 'What currency would you like to convert to?'
+CURRENCIES_ASK_FROM_CURRENCY = 'What currency would you like to convert from? Enter a currency code.'
+CURRENCIES_ASK_TO_CURRENCY = 'What currency would you like to convert to? Enter a currency code.'
 CURRENCIES_ASK_AMOUNT = 'Enter amount for convertation.'
 CURRENCIES_BAD_CURRENCY_CODE = (
     'Currency should be entered as three latin letters. Try again. For more information: '
     'https://en.wikipedia.org/wiki/ISO_4217'
 )
 CURRENCIES_BAD_AMOUNT = 'Amount should be an integer or a fractional number. Try again.'
-CURRENCIES_CONVERSION_ERROR = 'I cannot convert. Please, check the data you\'ve entered.'
+CURRENCIES_CONVERSION_ERROR = (
+    'I cannot convert. Please, check the data you\'ve entered. For more information on currency '
+    'codes: https://en.wikipedia.org/wiki/ISO_4217'
+)
 CURRENCIES_OUTPUT = '{amount:.2f} {from_currency} = {result:.2f} {to_currency}'
 
 # Poll
