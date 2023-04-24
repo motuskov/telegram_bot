@@ -22,7 +22,7 @@ class AccessDenied(Exception):
 async def get_random_image_by_tag(tag: str, api_key: str) -> bytes:
     '''
     Retrieves a random image from the Giphy service by tag 'tag' and API key 'api_key'.
-    Can raise exceptions 'AccessDenied' and 'ServiceUnavailable'.
+    Can raise exceptions 'AccessDenied', 'ServiceUnavailable' and 'aiohttp.ClientError'.
     '''
     # Set request parameters
     params = {

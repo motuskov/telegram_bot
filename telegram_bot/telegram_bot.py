@@ -12,6 +12,7 @@ from aiogram.types import (
     InlineKeyboardMarkup,
     InlineKeyboardButton,
 )
+from aiohttp import ClientError
 
 from weather import openweather
 from exchangerates import exchangerates
@@ -123,7 +124,7 @@ async def weather_locality(message: types.Message, state: FSMContext):
     except openweather.UnknownLocality:
         # Given locality hasn't found
         await message.answer(messages.WEATHER_BAD_LOCALITY.format(locality_name=locality_name))
-    except (openweather.AccessDenied, openweather.ServiceUnavailable):
+    except (openweather.AccessDenied, openweather.ServiceUnavailable, ClientError):
         # Some error has occured
         await message.answer(messages.SERVICE_UNAVAILABLE)
         await state.finish()
@@ -210,7 +211,7 @@ async def currencies_amount(message: types.Message, state: FSMContext):
             ))
         except exchangerates.ConversionError:
             await message.answer(messages.CURRENCIES_CONVERSION_ERROR)
-        except (exchangerates.AccessDenied, exchangerates.ServiceUnavailable):
+        except (exchangerates.AccessDenied, exchangerates.ServiceUnavailable, ClientError):
             await message.answer(messages.SERVICE_UNAVAILABLE)
         finally:
             await state.finish()
@@ -232,7 +233,7 @@ async def funny_image(message: types.Message):
     try:
         image = await giphy.get_random_image_by_tag('funny animals', keys.GIPHY_API_KEY)
         await message.answer_photo(image)
-    except (giphy.AccessDenied, giphy.ServiceUnavailable):
+    except (giphy.AccessDenied, giphy.ServiceUnavailable, ClientError):
         await message.answer(messages.SERVICE_UNAVAILABLE)
 
 

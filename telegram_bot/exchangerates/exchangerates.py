@@ -35,7 +35,8 @@ async def convert_currency(
     '''
     Converts 'amount' from currency with code 'from_cur_code' to currency with code 'to_cur_code'
     using the ExchangeRates service and API key 'api_key'.
-    Can raise exceptions 'ConversionError', 'AccessDenied' and 'ServiceUnavailable'.
+    Can raise exceptions 'ConversionError', 'AccessDenied', 'ServiceUnavailable' and 
+    'aiohttp.ClientError'.
     '''
     # Set request headers
     headers = {'apikey': api_key}

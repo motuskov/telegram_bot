@@ -33,7 +33,8 @@ async def get_locality_weather(locality_name: str, api_key: str) -> WeatherDataT
     Requests weather information from the OpenWeather service by name of locality 'locality_name'
     using service API_KEY 'api_key'. Returns a dictionary containing information about temperature,
     pressure and humidity in the locality.
-    Can raise exceptions 'UnknownLocality', 'ServiceUnavailable' and 'AccessDenied'.
+    Can raise exceptions 'UnknownLocality', 'ServiceUnavailable', 'AccessDenied' and 
+    'aiohttp.ClientError'.
     '''
     # Set request parameters
     params = {
