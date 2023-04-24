@@ -230,7 +230,7 @@ async def funny_image(message: types.Message):
 
     # Get image and send to the chat
     try:
-        image = await giphy.get_random_image_by_tag('funny', keys.GIPHY_API_KEY)
+        image = await giphy.get_random_image_by_tag('funny animals', keys.GIPHY_API_KEY)
         await message.answer_photo(image)
     except (giphy.AccessDenied, giphy.ServiceUnavailable):
         await message.answer(messages.SERVICE_UNAVAILABLE)

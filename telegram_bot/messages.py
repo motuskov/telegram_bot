@@ -9,7 +9,7 @@ MENU = (
     '\n'
     '  /weather - get current weather in a locality\n'
     '  /currencies - convert currencies\n'
-    '  /funny - get a funny image\n'
+    '  /funny - get a funny image with animals\n'
     '  /poll - create a poll\n'
     '\n'
     '  /cancel - cancel a command process'
@@ -17,7 +17,7 @@ MENU = (
 WELCOME = (
     'Hi!\n'
     'I\'m a bot for testing purposes. I can inform you about current weather, convert currencies, '
-    'send funny images and create polls.'
+    'send funny images of animals and create polls in group chats.'
 )
 SERVICE_UNAVAILABLE = 'Something went wrong. We\'re working on that. Try again later.'
 WAIT_MOMENT = 'Sure, wait for a moment...'
